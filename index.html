@@ -129,6 +129,7 @@ h1,h2,h3,.slide h1,.slide h2,.nav,.btn{font-family:var(--f-head)}
 .gate-open{background:radial-gradient(ellipse at 50% 120%, var(--gold-w) 0%, transparent 60%),linear-gradient(180deg,#FBF7EF 0%,#F6EEDD 100%);display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:2em;padding:2.4em 3.4em}
 .diagimg{display:block;width:100%;max-width:38em;height:auto;margin:0 auto .4em}
 .gate-open .artcol{display:flex;flex-direction:column;align-items:center;align-self:stretch;justify-content:center;position:static!important}
+#gcbadge{position:absolute;top:1em;left:50%;transform:translateX(-50%);z-index:50;background:var(--ink);color:#fff;font-family:var(--f-head);font-weight:700;font-size:1.1em;padding:.45em 1.1em;border-radius:99px;box-shadow:0 .4em 1.2em rgba(42,49,66,.25)}
 .gate-open .logo2{position:absolute;top:0;left:calc(2em / var(--fit,1));z-index:3;width:7em;height:auto;display:block;box-sizing:content-box;background:#fff;padding:1.6em 1.2em 1.1em;border-radius:0 0 1.3em 1.3em;box-shadow:0 .4em 1.2em rgba(42,49,66,.12)}
 .gate-open .gateart{display:block;width:100%;max-width:38em;width:112%;height:auto;max-height:32em;object-fit:contain;margin:-.5em -2em -1.5em -1em;transform:translateX(3.7em)}
 .steamrow{display:inline-grid;gap:.55em;margin:.5em 0 .2em;align-self:flex-start}
@@ -596,6 +597,15 @@ function render(){
  requestAnimationFrame(fit);
 }
 function fit(){const el=$('#root .slide');if(!el)return;el.style.overflowY='hidden';const bl=[...el.querySelectorAll('.blob,.spark')];bl.forEach(b=>b.style.display='none');let f=1;el.style.fontSize='1em';while(el.scrollHeight>el.clientHeight+2&&f>0.62){f-=0.04;el.style.fontSize=f+'em'}if(el.scrollHeight>el.clientHeight+2)el.style.overflowY='auto';el.style.setProperty('--fit',f);bl.forEach(b=>b.style.display='');const pop=$('#root .pop');if(pop){pop.style.overflowY='auto'}}
+
+/* ---------- hidden visit counter via Google Sheets (GitHub Pages only) ---------- */
+const GS_URL='https://script.google.com/macros/s/AKfycbzQ1RqpVnq5_LxyKISnBO3TpI-QcL1K5onbHBVzMVZy4vW0w9Vl7aE2BsbLfhfN9Dd9/exec';  // Apps Script web-app URL (…/exec)
+const GC_ON=!!GS_URL&&/github\.io$/.test(location.hostname);
+if(GC_ON){let seen=false;try{seen=sessionStorage.getItem('gsHit')==='1'}catch(e){}if(!seen){fetch(GS_URL+'?a=hit').catch(()=>{});try{sessionStorage.setItem('gsHit','1')}catch(e){}}}
+let gcClicks=0,gcT=null;
+function gcShow(txt){let b=document.getElementById('gcbadge');if(!b){b=document.createElement('div');b.id='gcbadge';document.getElementById('stage').appendChild(b)}b.textContent=txt;b.hidden=false;clearTimeout(gcT);gcT=setTimeout(()=>{b.hidden=true},6000)}
+function gcReveal(){if(!GS_URL){gcShow('המונה עוד לא הוגדר');return}gcShow('סופר…');fetch(GS_URL+'?a=peek').then(r=>r.ok?r.json():Promise.reject()).then(d=>gcShow(Number(d.count).toLocaleString('he-IL')+' כניסות')).catch(()=>gcShow('לא הצלחתי לקרוא את המונה'))}
+document.addEventListener('click',e=>{if(!e.target.closest('.logo2'))return;gcClicks++;clearTimeout(window.__gcc);window.__gcc=setTimeout(()=>{gcClicks=0},900);if(gcClicks>=3){gcClicks=0;gcReveal()}});
 let rt=null;if(window.ResizeObserver)new ResizeObserver(()=>{clearTimeout(rt);rt=setTimeout(fit,120)}).observe(document.getElementById('stage'));
 function go(d){const list=secList(S.sec);const j=S.i+d;if(j<0){if(S.sec!=='open'){S.sec='open';S.i=1;S.lvOpen=false;render()}return}if(j>=list.length){if(S.sec!=='open'){S.sec='open';S.i=1;S.lvOpen=false;render()}return}S.i=j;S.lvOpen=false;render()}
 function goSec(id){if(id==='menu'){S.sec='open';S.i=1}else{S.sec=id;S.i=0}S.lvOpen=false;S.pop=null;render()}
